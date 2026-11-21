@@ -18,7 +18,7 @@ pip install .
 
 ```
 pip wheel --no-deps -w dist .
-pip install dist/rfc_qa-0.1.0-py3-none-any.whl
+pip install dist/rfc_qa-0.2.0-py3-none-any.whl
 ```
 
 The commands then work from any directory, and the clone can be removed: the default configuration

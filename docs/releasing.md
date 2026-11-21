@@ -16,11 +16,15 @@ use `v0.2.0` as the example version.
    ```
 
 2. **Update `ARCHITECTURE.md`**, as described in [Updating
-   ARCHITECTURE.md](#updating-architecturemd) below, review its report, and commit the result:
+   ARCHITECTURE.md](#updating-architecturemd) below, review its report, and commit the result to
+   the release branch:
 
    ```
    python scripts/update_architecture.py v0.2.0
    ```
+
+   The update doesn't need a pull request of its own: it merges to `main` with the changelog and
+   the version, in the release pull request.
 
 3. **Turn `[Unreleased]` into the release** in [`CHANGELOG.md`](../CHANGELOG.md):
    - rename the `## [Unreleased]` heading to `## [0.2.0] - <today's date>`, in `YYYY-MM-DD` form;
@@ -55,10 +59,11 @@ use `v0.2.0` as the example version.
 ## Updating ARCHITECTURE.md
 
 `ARCHITECTURE.md` is generated from the source code just before each release, and reviewed in a pull
-request. It doesn't go through the OpenSpec process. From a release branch:
+request. It doesn't go through the OpenSpec process. Run the script on the release branch, and
+commit the result there:
 
 ```
-python scripts/update_architecture.py v0.1.0
+python scripts/update_architecture.py v0.2.0
 ```
 
 The script runs the `update-architecture` skill in headless Claude Code with the model pinned in

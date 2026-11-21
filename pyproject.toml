@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rfc-qa"
-version = "0.1.0"
+version = "0.2.0"
 description = "Answer questions from the RFCs with checked citations."
 readme = "README.md"
 requires-python = ">=3.14"

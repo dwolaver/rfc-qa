@@ -10,6 +10,8 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-21
+
 ### Added
 
 - The `rfc-ingest`, `rfc-query` and `rfc-search` commands, installed with the project, in place of
@@ -74,5 +76,6 @@ All notable changes to this project are recorded here. The format follows
 - CI that runs the tests on every pull request, and a check that a pull request's OpenSpec change
   is archived before it merges.
 
-[Unreleased]: https://github.com/dwolaver/rfc-qa/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/dwolaver/rfc-qa/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/dwolaver/rfc-qa/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/dwolaver/rfc-qa/releases/tag/v0.1.0
