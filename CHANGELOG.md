@@ -10,6 +10,16 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- A golden question set, `eval/golden.toml`, of questions labeled with the RFC sections that answer
+  them. It includes questions an obsolete RFC also matches, and questions about earlier versions
+  such as TLS 1.2.
+- `scripts/score_retrieval.py`, which scores keyword search against the golden set with hit@1,
+  hit@5, mean reciprocal rank and the rate at which an obsolete RFC outranks the current one, in
+  total and for each kind of question. [Evaluation](docs/evaluation.md) explains the format, how to
+  add a question and how to read the scores.
+
 ## [0.2.0] - 2026-11-21
 
 ### Added
