@@ -140,6 +140,21 @@ def read_metadata(path: str) -> dict[str, str]:
         connection.close()
 
 
+def list_sections(path: str) -> set[tuple[int, str]]:
+    """Return each ``(rfc_number, section_number)`` that has at least one chunk in the index.
+
+    Raises :class:`~rfc_qa.errors.IndexUnavailableError` if the index is missing or can't be read.
+    """
+    connection = _connect_read_only(path)
+    try:
+        rows = connection.execute("SELECT DISTINCT rfc_number, section_number FROM chunks").fetchall()
+    except sqlite3.Error as exc:
+        raise _unreadable("read", path, exc) from exc
+    finally:
+        connection.close()
+    return {(int(number), str(section)) for number, section in rows}
+
+
 def _to_match_expression(query_text: str) -> str:
     """Quote each token, so that user text can't be read as FTS query syntax."""
     tokens = re.findall(r"\w+", query_text)

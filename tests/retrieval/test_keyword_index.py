@@ -9,7 +9,7 @@ from rfc_qa import paths
 from rfc_qa.chunk import Chunk
 from rfc_qa.errors import IndexBuildError, IndexUnavailableError
 from rfc_qa.retrieval import keyword_index
-from rfc_qa.retrieval.keyword_index import build_index, main, read_metadata, search
+from rfc_qa.retrieval.keyword_index import build_index, list_sections, main, read_metadata, search
 from tests.conftest import split_stderr
 
 METADATA = {"embedding_model_name": "nomic-embed-text", "max_chunk_chars": 2970}
@@ -169,7 +169,23 @@ def test_query_with_no_tokens_is_empty(index_path):
     assert search(index_path, "!!! ---") == []
 
 
-@pytest.mark.parametrize("read", [lambda path: search(path, "handshake"), read_metadata])
+# --- Listing sections ---
+
+
+def test_list_sections_gives_each_section_once(tmp_path):
+    second = Chunk("rfc9110-s8.6-p1", 9110, "RFC 9110", "tcp", "8.6", "Content-Length", "More text.")
+    path = str(tmp_path / "index.db")
+    build_index([*CHUNKS, second], METADATA, path)
+    assert list_sections(path) == {(793, "3.4"), (9293, "3.5"), (9110, "8.6"), (9110, "1")}
+
+
+def test_list_sections_of_an_empty_index(tmp_path):
+    path = str(tmp_path / "index.db")
+    build_index([], METADATA, path)
+    assert list_sections(path) == set()
+
+
+@pytest.mark.parametrize("read", [lambda path: search(path, "handshake"), read_metadata, list_sections])
 def test_missing_index_raises_and_is_not_created(tmp_path, capsys, read):
     path = str(tmp_path / "missing.db")
     with pytest.raises(IndexUnavailableError) as excinfo:
@@ -181,7 +197,7 @@ def test_missing_index_raises_and_is_not_created(tmp_path, capsys, read):
 
 @pytest.mark.parametrize(
     ("read", "action"),
-    [(lambda path: search(path, "handshake"), "search"), (read_metadata, "read")],
+    [(lambda path: search(path, "handshake"), "search"), (read_metadata, "read"), (list_sections, "read")],
 )
 def test_unreadable_index_raises_with_the_database_error(tmp_path, capsys, read, action):
     path = tmp_path / "index.db"
