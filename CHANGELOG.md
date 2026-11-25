@@ -19,6 +19,9 @@ All notable changes to this project are recorded here. The format follows
   hit@5, mean reciprocal rank and the rate at which an obsolete RFC outranks the current one, in
   total and for each kind of question. [Evaluation](docs/evaluation.md) explains the format, how to
   add a question and how to read the scores.
+- More questions in the golden set, including more stale-trap questions. When several RFCs
+  obsolete the same RFC, a label's `replaced_by` names the one with the latest publication date,
+  and the lowest-numbered when they share a month, as [Evaluation](docs/evaluation.md) describes.
 
 ## [0.2.0] - 2026-11-21
 

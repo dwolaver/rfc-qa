@@ -119,10 +119,18 @@ obsolete = [
    head -12 rfc9113.txt
    ```
 
-   The header can run onto a second line. `replaced_by` is the newest RFC in the corpus whose
-   header names the obsolete RFC. RFC 5246, for example, is named by both RFC 8446 and RFC 9846, so
-   its `replaced_by` is 9846. Section numbers can change between an RFC and its replacement, as
-   RFC 8446's section 4.6.1 became RFC 9846's section 4.7.1, so check each one.
+   The header can run onto a second line, as RFC 9110's does, so read all of it. `replaced_by` is
+   the newest RFC in the corpus whose header names the obsolete RFC, judged by the month and year
+   on its first page rather than by its number. RFC 4366, for example, is named by RFC 5246, from
+   August 2008, and by RFC 6066, from January 2011, so its `replaced_by` is 6066. When more than one
+   RFC shares the latest month, `replaced_by` is the lowest-numbered: RFC 2616 is named by RFCs 7230
+   to 7235, all from June 2014, so its `replaced_by` is 7230, and RFC 7230 is named by RFCs 9110 and
+   9112, both from June 2022, so its `replaced_by` is 9110.
+
+   `replaced_by` names an RFC that replaced the whole document, not the RFC a section moved to. RFC
+   2616's status codes moved to RFC 7231, but their `replaced_by` is still 7230. Section numbers can
+   change between an RFC and its replacement, as RFC 8446's section 4.6.1 became RFC 9846's section
+   4.7.1, so check each one.
 5. **Run the checks.** `pytest tests/scripts/test_score_retrieval.py` checks the file's structure,
    and that every RFC it names is in the corpus. `python scripts/score_retrieval.py` checks that
    every section is in the index, then scores it.

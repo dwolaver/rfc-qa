@@ -17,7 +17,7 @@
 #  exactly as the index records it. A result matches only its exact section: 15.5.5 isn't 15.5.
 #  Each expected section also has a quote, copied from one line of that section, as evidence for
 #  review. replaced_by names the newest RFC in the corpus whose Obsoletes: header names the
-#  section's RFC.
+#  section's RFC, by the month and year on its first page. A tie goes to the lowest number.
 #
 #  The kinds:
 #
@@ -71,6 +71,40 @@ expected = [
     { rfc = 9293, section = "3.10.7.4", quote = "a \"challenge ACK\" to the remote peer:" },
 ]
 
+[[question]]
+id       = "websocket-close"
+kind     = "direct"
+question = "What are the reasons that a websocket is closed?"
+expected = [
+    { rfc = 6455, section = "7.1.5", quote = "contain a status code indicating a reason for closure.  A closing of" },
+    { rfc = 6455, section = "7.4.1", quote = "Endpoints MAY use the following pre-defined status codes when sending" },
+]
+
+[[question]]
+id       = "websocket-data-framing"
+kind     = "direct"
+question = "How is data laid out when it is sent over a WebSocket connection?"
+expected = [
+    { rfc = 6455, section = "5.1", quote = "In the WebSocket Protocol, data is transmitted using a sequence of" },
+    { rfc = 6455, section = "5.2", quote = "of the framing is given in the following figure.  In a case of" },
+]
+
+[[question]]
+id       = "http-header-format"
+kind     = "direct"
+question = "Can I use JSON for an HTTP request header?"
+expected = [
+    { rfc = 9651, section = "A.1", quote = "Earlier proposals for Structured Fields were based upon JSON" },
+]
+
+[[question]]
+id       = "http2-changes"
+kind     = "direct"
+question = "What changed in HTTP/2 since its first version?"
+expected = [
+    { rfc = 9113, section = "B", quote = "This revision includes the following substantive changes:" },
+]
+
 # --------------------------------------------------------------------------------------------------
 #  multi-section
 # --------------------------------------------------------------------------------------------------
@@ -95,6 +129,65 @@ expected = [
     { rfc = 6455, section = "4.1", quote = "To _Establish a WebSocket Connection_, a client opens a connection" },
     { rfc = 6455, section = "7.1.1", quote = "cleanly closes the TCP connection, as well as the TLS session, if" },
     { rfc = 6455, section = "7.1.2", quote = "/reason/, an endpoint MUST send a Close control frame, as described" },
+]
+
+[[question]]
+id       = "websocket-message-fragmenting"
+kind     = "multi-section"
+question = "How are large WebSocket messages chunked and reassembled?"
+expected = [
+    { rfc = 6455, section = "5.4", quote = "to split the message into smaller fragments to better share the" },
+    { rfc = 6455, section = "6.2", quote = "a fragmented message, the \"Application data\" of the subsequent data" },
+]
+
+[[question]]
+id       = "tcp-selective-ack"
+kind     = "multi-section"
+question = "In the TCP selective acknowledgement specification, RFC 2018, what are the responsibilities of the data receiver?"
+expected = [
+    { rfc = 2018, section = "4", quote = "for this connection, the data receiver MAY elect to generate SACK" },
+    { rfc = 2018, section = "8", quote = "The data receiver MAY elect not to keep data which it has reported in" },
+]
+
+[[question]]
+id       = "cookies-management"
+kind     = "multi-section"
+question = "What does a server do to set a cookie, and what does the user agent do when it receives one?"
+expected = [
+    { rfc = 6265, section = "4.1", quote = "The Set-Cookie HTTP response header is used to send cookies from the" },
+    { rfc = 6265, section = "5.2", quote = "When a user agent receives a Set-Cookie header field in an HTTP" },
+    { rfc = 6265, section = "5.3", quote = "The user agent stores the following fields about each cookie: name," },
+]
+
+[[question]]
+id       = "patch-headers"
+kind     = "multi-section"
+question = "How does a client learn which patch formats a server accepts, and how does it say which format it's sending?"
+expected = [
+    { rfc = 5789, section = "3.1", quote = "The Accept-Patch header specifies a comma-separated listing of media-" },
+    { rfc = 5789, section = "2", quote = "document\" identified by a media type." },
+    { rfc = 5789, section = "2.2", quote = "Accept-Patch response header as described in Section 3.1 to notify" },
+]
+
+[[question]]
+id       = "alpn-design-security"
+kind     = "multi-section"
+question = "Why does ALPN send the protocol choice in the clear, and what risk does that create?"
+expected = [
+    { rfc = 7301, section = "4", quote = "The ALPN extension is intended to follow the typical design of TLS" },
+    { rfc = 7301, section = "5", quote = "The ALPN extension does not impact the security of TLS session" },
+]
+
+[[question]]
+id       = "tcp-fast-open-attacks"
+kind     = "multi-section"
+question = "What are some attacks on the TCP Fast Open protocol?"
+expected = [
+    { rfc = 7413, section = "5.1", quote = "TFO is vulnerable to such an attack.  But the potential damage can be" },
+    { rfc = 7413, section = "5.2", quote = "attack from a large number of servers.  An attacker can easily cause" },
+    { rfc = 7413, section = "5", quote = "regular SYN packet.  We describe these new vulnerabilities of TFO and" },
+    { rfc = 7413, section = "5.1.1", quote = "An attacker behind a NAT can easily obtain valid cookies to launch" },
+    { rfc = 7413, section = "2.2", quote = "serious new vulnerabilities.  Applications serving ports that have" },
 ]
 
 # --------------------------------------------------------------------------------------------------
@@ -146,6 +239,88 @@ obsolete = [
     { rfc = 793, section = "3.4", replaced_by = 9293 },
 ]
 
+[[question]]
+id       = "http-problem-details-format"
+kind     = "stale-trap"
+question = "After making an HTTP request, what is the format of an error response?"
+expected = [
+    { rfc = 9457, section = "3", quote = "The canonical model for problem details is a JSON [JSON] object." },
+    { rfc = 9110, section = "15.5", quote = "The 4xx (Client Error) class of status code indicates that the client" },
+    { rfc = 9110, section = "15.6", quote = "The 5xx (Server Error) class of status code indicates that the server" },
+]
+obsolete = [
+    { rfc = 7231, section = "6.5", replaced_by = 9110 },
+    { rfc = 7231, section = "6.6", replaced_by = 9110 },
+]
+
+[[question]]
+id       = "http-encryption"
+kind     = "stale-trap"
+question = "How can I encrypt data going across an HTTP connection?"
+expected = [
+    { rfc = 9110, section = "4.2.2", quote = "establishing a TLS ([TLS13]) connection that has been secured for" },
+    { rfc = 9112, section = "9.7", quote = "Conceptually, HTTP/TLS is simply sending HTTP messages over a" },
+]
+obsolete = [
+    { rfc = 2818, section = "1", replaced_by = 9110 },
+    { rfc = 2818, section = "2", replaced_by = 9110 },
+    { rfc = 2818, section = "2.1", replaced_by = 9110 },
+    { rfc = 7230, section = "2.7.2", replaced_by = 9110 },
+]
+
+[[question]]
+id       = "tls-certificate-formats"
+kind     = "stale-trap"
+question = "What are the certificate formats that a client can send to the server during the TLS handshake?"
+expected = [
+    { rfc = 9846, section = "4.5.1", quote = "negotiated, then each CertificateEntry contains a DER-encoded X.509" },
+    { rfc = 9846, section = "4.5.1.2", quote = "The certificate type MUST be X.509v3 [RFC5280], unless explicitly" },
+    { rfc = 6066, section = "5", quote = "In order to negotiate sending certificate URLs to a server, clients" },
+]
+obsolete = [
+    { rfc = 8446, section = "4.4.2", replaced_by = 9846 },
+    { rfc = 8446, section = "4.4.2.3", replaced_by = 9846 },
+    { rfc = 5246, section = "7.4.6", replaced_by = 9846 },
+]
+
+[[question]]
+id       = "http1-status-codes"
+kind     = "stale-trap"
+question = "Is 207 a valid status code in HTTP 1.1?"
+expected = [
+    { rfc = 9110, section = "15", quote = "digit, and treat an unrecognized status code as being equivalent to" },
+]
+obsolete = [
+    { rfc = 7231, section = "6", replaced_by = 9110 },
+    { rfc = 2616, section = "6.1.1", replaced_by = 7230 },
+]
+
+[[question]]
+id       = "http-valid-methods"
+kind     = "stale-trap"
+question = "What are all the valid HTTP methods?"
+expected = [
+    { rfc = 9110, section = "9.1", quote = "This specification defines a number of standardized methods that are" },
+    { rfc = 9110, section = "16.1.1", quote = "by IANA at <https://www.iana.org/assignments/http-methods>, registers" },
+    { rfc = 5789, section = "2", quote = "The PATCH method requests that a set of changes described in the" },
+]
+obsolete = [
+    { rfc = 7231, section = "4.1", replaced_by = 9110 },
+    { rfc = 2616, section = "5.1.1", replaced_by = 7230 },
+    { rfc = 2616, section = "9", replaced_by = 7230 },
+]
+
+[[question]]
+id       = "rfc5246-replaced"
+kind     = "stale-trap"
+question = "Why was RFC 5246 replaced?"
+expected = [
+    { rfc = 9846, section = "1.3", quote = "The following is a list of the major functional differences between" },
+]
+obsolete = [
+    { rfc = 8446, section = "1.2", replaced_by = 9846 },
+]
+
 # --------------------------------------------------------------------------------------------------
 #  version-specific
 # --------------------------------------------------------------------------------------------------
@@ -169,6 +344,58 @@ expected = [
     { rfc = 7540, section = "6.3", replaced_by = 9113, quote = "The PRIORITY frame (type=0x2) specifies the sender-advised priority" },
 ]
 
+[[question]]
+id       = "rfc2616-purpose"
+kind     = "version-specific"
+question = "Summarize the main purpose of creating the HTTP protocol in RFC 2616."
+expected = [
+    { rfc = 2616, section = "1.1", replaced_by = 7230, quote = "not sufficiently take into consideration the effects of hierarchical" },
+]
+
+[[question]]
+id       = "rfc5077-client-resume"
+kind     = "version-specific"
+question = "In RFC 5077, how does a client indicate that it wants to resume a session?"
+expected = [
+    { rfc = 5077, section = "3.1", replaced_by = 9846, quote = "wishes to resume the session, it includes the ticket in the" },
+    { rfc = 5077, section = "3.2", replaced_by = 9846, quote = "session, then it includes the ticket in the SessionTicket extension" },
+]
+
+[[question]]
+id       = "rfc4346-required-ciphers"
+kind     = "version-specific"
+question = "What are the ciphers that must be supported in RFC 4346?"
+expected = [
+    { rfc = 4346, section = "9", replaced_by = 5246, quote = "otherwise, a TLS compliant application MUST implement the cipher" },
+]
+
+[[question]]
+id       = "rfc8446-client-first-msg"
+kind     = "version-specific"
+question = "According to RFC 8446, what is the client's first message?"
+expected = [
+    { rfc = 8446, section = "4.1.2", replaced_by = 9846, quote = "ClientHello as its first TLS message.  The client will also send a" },
+    { rfc = 8446, section = "2", replaced_by = 9846, quote = "In the Key Exchange phase, the client sends the ClientHello" },
+]
+
+[[question]]
+id       = "rfc-1323-timestamp"
+kind     = "version-specific"
+question = "How many timestamps should the receiver's state store according to RFC 1323?"
+expected = [
+    { rfc = 1323, section = "3.4", replaced_by = 7323, quote = "should be required to retain at most one timestamp in the" },
+]
+
+[[question]]
+id       = "rfc-8312-congestion"
+kind     = "version-specific"
+question = "According to RFC 8312, how do competing flows converge to a fair share of bandwidth?"
+expected = [
+    { rfc = 8312, section = "4.6", replaced_by = 9438, quote = "existing flows, the following mechanism called \"fast convergence\"" },
+    { rfc = 8312, section = "5.6", replaced_by = 9438, quote = "CUBIC ensures convergence of competing CUBIC flows with the same RTT" },
+    { rfc = 8312, section = "3", replaced_by = 9438, quote = "with the same RTT always converge to the same throughput independent" },
+]
+
 # --------------------------------------------------------------------------------------------------
 #  out-of-corpus
 # --------------------------------------------------------------------------------------------------
@@ -182,3 +409,28 @@ question = "How does a client send a DNS query over HTTPS?"
 id       = "ssh-key-exchange"
 kind     = "out-of-corpus"
 question = "How do an SSH client and server agree on a key exchange algorithm?"
+
+[[question]]
+id       = "json-object-decode"
+kind     = "out-of-corpus"
+question = "How does an HTTP client parse a JSON object?"
+
+[[question]]
+id       = "socket-reuseaddr"
+kind     = "out-of-corpus"
+question = "How do I set a socket's SO_REUSEADDR option?"
+
+[[question]]
+id       = "websocket-client-download"
+kind     = "out-of-corpus"
+question = "Where can I download a websocket client for windows?"
+
+[[question]]
+id       = "websocket-proxy-server"
+kind     = "out-of-corpus"
+question = "How do I configure nginx as a WebSocket proxy?"
+
+[[question]]
+id       = "websocket-throughput"
+kind     = "out-of-corpus"
+question = "What's the maximum throughput for a websocket connection?"
