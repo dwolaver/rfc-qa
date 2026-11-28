@@ -200,6 +200,29 @@ def test_empty_answer_is_not_found(model):
     assert _answer_with(model, {"found": True, "answer": "  ", "citations": ["P1"]}).found is False
 
 
+# --- Rejected answers ---
+
+
+def test_answer_with_no_valid_citations_is_rejected(model):
+    result = _answer_with(model, {"found": True, "answer": "BGP picks paths.", "citations": ["RFC4271"]})
+    assert (result.found, result.answer, result.cited, result.answer_rejected) == (False, None, [], True)
+
+
+def test_blank_answer_with_a_valid_citation_is_rejected(model):
+    result = _answer_with(model, {"found": True, "answer": "  ", "citations": ["P1"]})
+    assert (result.found, result.answer, result.cited, result.answer_rejected) == (False, None, [], True)
+
+
+def test_model_reporting_no_answer_is_not_rejected(model):
+    assert _answer_with(model, {"found": False, "answer": "", "citations": []}).answer_rejected is False
+
+
+def test_answered_question_is_not_rejected(model):
+    assert (
+        _answer_with(model, {"found": True, "answer": "Gone.", "citations": ["P1"]}).answer_rejected is False
+    )
+
+
 @pytest.mark.parametrize(
     "output",
     [

@@ -22,6 +22,19 @@ All notable changes to this project are recorded here. The format follows
 - More questions in the golden set, including more stale-trap questions. When several RFCs
   obsolete the same RFC, a label's `replaced_by` names the one with the latest publication date,
   and the lowest-numbered when they share a month, as [Evaluation](docs/evaluation.md) describes.
+- `scripts/score_answers.py`, which asks each golden question through `query()` and scores the answer
+  by its citations: whether it cites a section that answers the question, whether a stale-citation
+  trap cites the obsolete RFC, and whether a question the corpus doesn't answer is declined. Each miss
+  is put down to retrieval or to generation, and each run is saved as JSON Lines. It needs Ollama, and
+  runs locally on demand.
+- `QueryResponse.answer_rejected`, which is true when a not-found result came from an answer the
+  service rejected, because it cited no passage the model was sent or was blank, rather than from the
+  model declining.
+
+### Changed
+
+- With `-v`, `rfc-query` logs a rejected answer as rejected. It used to say that the model found no
+  answer.
 
 ## [0.2.0] - 2026-11-21
 

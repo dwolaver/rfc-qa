@@ -3,12 +3,14 @@
 [Back to README](../README.md)
 
 The golden question set, [`eval/golden.toml`](../eval/golden.toml), is a fixed list of questions,
-each labeled with the RFC sections that answer it. `scripts/score_retrieval.py` searches the index
-with each question and reports where the first correct section ranks. Each change to retrieval runs
-it before and after, so the change can show what it improved and what it made worse.
+each labeled with the RFC sections that answer it. Two scripts score against it:
 
-Scoring reads only the index. It needs no model, and gives the same result on every run against the
-same index.
+- `scripts/score_retrieval.py` searches the index with each question and reports where the first
+  correct section ranks. Each change to retrieval runs it before and after, so the change can show
+  what it improved and what it made worse. It reads only the index, needs no model, and gives the
+  same result on every run against the same index.
+- `scripts/score_answers.py` asks each question through `query()` and scores the answer by the
+  sections it cites, as described in [Scoring answers](#scoring-answers). It needs Ollama.
 
 ## Running the scores
 
@@ -54,11 +56,93 @@ hit@1  2/11 (0.18)    hit@5  7/11 (0.64)    MRR 0.35    trap rate 3/3 (1.00)
   is better.
 
 A table after the totals gives hit@1 and hit@5 for each kind. `out-of-corpus` questions are skipped
-and counted, because a search always returns its closest matches. Scoring answers, including
-whether the model says it can't answer, is a later step.
+and counted, because a search always returns its closest matches. Whether the model declines to
+answer them is measured by [scoring answers](#scoring-answers).
 
 With about a dozen questions, one question moves hit@1 by almost 10 points, so read a change's
 effect question by question as well as in the totals.
+
+## Scoring answers
+
+Answer scoring asks every golden question through `query()`, as a user's question would be asked,
+and scores each answer by its citations and by whether it answered at all. It doesn't judge the
+answer's text: an answer that cites the right section can still say something wrong.
+
+It needs the index, Ollama and the configured model, so it runs locally on demand and isn't part of
+CI. From the repository root, with the project installed for development:
+
+```
+python -m scripts.score_answers
+```
+
+It runs as a module, with `-m`, because it reuses the retrieval scorer's code. `--data-dir`,
+`--golden` and `-v` work as they do for retrieval scoring, and `--config-dir` chooses the query
+configuration as `rfc-query` does. A run of 40 questions takes under a minute once the model is
+loaded.
+
+Before the first question it checks the golden set, checks every label against the index, and asks
+Ollama for the configured model. If any of these fails, it asks nothing and exits with status 1. A
+query whose model output is invalid is scored as an `error`, and the run goes on. If Ollama, the
+index or the configuration stops working partway, the run stops with status 1. Otherwise it exits
+with status 0, whatever the scores.
+
+### The run file
+
+Each run is saved as JSON Lines, one line as each question finishes, so an interrupted run keeps
+what it finished. By default it's a new file in `eval-runs/` in the data directory, outside the
+repository, named by the time it started, such as `answers-20261128T144235Z.jsonl`. `--output`
+names another file.
+
+The first line describes the run: the model and its digest, the Ollama address, the number of
+passages per query, the commit and whether the working tree had changes, the golden set and the
+index. Each later line is one question, with its retrieval rank, the full response and its scores.
+
+### Reading the output
+
+```
+id                        kind              rank  outcome     cause       stale  cited
+tcp-data-in-syn           direct               1  correct     -           -      1/4
+http-header-format        direct               4  abstained   generation  -      0/1
+tls13-resumption          stale-trap           5  wrong-cite  generation  yes    0/3
+dns-over-https            out-of-corpus        -  answered    -           -      -
+...
+
+cited correctly  15/33 (0.45)    misses: retrieval 16, generation 2
+stale citations  4/9 (0.44)
+abstained        1/7 (0.14) of out-of-corpus, 4/33 (0.12) of answerable
+rejected         1/40 (0.03)    errors 0/40 (0.00)
+```
+
+- **rank:** the rank of the first expected section in a search of the first 20 results, as
+  retrieval scoring reports it. It's `-` when none was found, and for `out-of-corpus` questions.
+- **outcome:** for a question the corpus answers:
+  - `correct`: the answer cites at least one expected section.
+  - `wrong-cite`: it answered, but cites no expected section.
+  - `abstained`: the query said the indexed RFCs don't answer it.
+  - `rejected`: the model said it found an answer, but none of its citations named a passage it was
+    sent, or the answer was blank, so the query reported it as not found.
+  - `error`: the query failed.
+
+  For an `out-of-corpus` question, `abstained` is the correct outcome, and `answered` means it gave
+  an answer anyway. `rejected` isn't counted as declining: the model tried to answer.
+- **cause:** for a question the corpus answers that isn't `correct`, `retrieval` when no expected
+  section was among the passages sent to the model, and `generation` when one was but the model
+  didn't cite it. The number of passages comes from `retrieval.limit` in the query configuration.
+- **stale:** for a `stale-trap` question, `yes` when the answer cites one of the question's obsolete
+  sections, even if it also cites a current one.
+- **cited:** how many of the question's expected sections the answer cites. A `multi-section`
+  question needs only one to count as correct, so this shows how much of the answer was covered.
+
+The totals give the share of answerable questions cited correctly, and their misses by cause; stale
+citations out of the traps; correct abstentions out of the `out-of-corpus` questions, and
+abstentions out of the answerable ones, where declining is a miss; and rejected answers and errors
+out of every question. A table by kind follows.
+
+"Cited correctly" is not "answered correctly". A later step checks each answer's facts.
+
+The model runs at temperature 0, but its answers can still vary a little between runs. Compare runs
+question by question, with each run file's model, digest and commit beside it, rather than reading a
+small change in a total as an effect.
 
 ## The kinds of question
 
