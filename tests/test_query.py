@@ -357,6 +357,33 @@ def test_model_not_found_is_a_successful_not_found(setup):
     assert response.answer == answer_generator.NOT_FOUND_ANSWER
 
 
+def test_rejected_answer_is_a_not_found_marked_rejected(setup):
+    setup.result = answer_generator.GenerationResult(found=False, answer=None, answer_rejected=True)
+    response = run_query("What does a 404 status code mean?")
+    assert (response.success, response.found, response.citations) == (True, False, [])
+    assert response.answer == answer_generator.NOT_FOUND_ANSWER
+    assert response.answer_rejected is True
+
+
+def test_model_not_found_is_not_marked_rejected(setup):
+    setup.result = answer_generator.GenerationResult(found=False, answer=None)
+    assert run_query("What does a 404 status code mean?").answer_rejected is False
+
+
+def test_answered_query_is_not_marked_rejected(setup):
+    assert run_query("What does a 404 status code mean?").answer_rejected is False
+
+
+def test_nothing_retrieved_is_not_marked_rejected(setup):
+    assert run_query("zzzzqqqq").answer_rejected is False
+
+
+def test_failure_is_not_marked_rejected(setup):
+    setup.error = ModelUnavailableError("Can't reach Ollama. Start Ollama.")
+    response = run_query("What does a 404 status code mean?")
+    assert (response.success, response.answer_rejected) == (False, False)
+
+
 def test_missing_index(tmp_path, monkeypatch, setup):
     missing = tmp_path / "missing"
     monkeypatch.setenv(paths.DATA_DIR_ENV, str(missing))
@@ -562,6 +589,14 @@ def test_main_not_found_exits_zero(setup, capsys):
     assert captured.err == ""
 
 
+def test_main_prints_a_rejected_answer_as_not_found(setup, capsys):
+    setup.result = answer_generator.GenerationResult(found=False, answer=None, answer_rejected=True)
+    assert main(["What does a 404 status code mean?"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out.strip() == answer_generator.NOT_FOUND_ANSWER
+    assert captured.err == ""
+
+
 def test_main_failure_routes_to_stderr_nonzero(setup, capsys):
     setup.error = ModelUnavailableError("Can't reach Ollama. Start Ollama.")
     assert main(["What does a 404 status code mean?"]) != 0
@@ -686,6 +721,16 @@ def test_not_found_by_the_model_is_logged(setup, caplog):
     setup.result = answer_generator.GenerationResult(found=False, answer=None, model_load_ms=2)
     run_query("What does a 404 status code mean?")
     assert re.fullmatch(r"The model found no answer in the passages, in \d+ ms", _query_records(caplog)[-1])
+
+
+def test_rejected_answer_is_logged(setup, caplog):
+    caplog.set_level(logging.INFO, logger="rfc_qa")
+    setup.result = answer_generator.GenerationResult(found=False, answer=None, answer_rejected=True)
+    run_query("What does a 404 status code mean?")
+    assert re.fullmatch(
+        r"The model's answer was rejected, in \d+ ms: it cited no passage it was sent, or was blank",
+        _query_records(caplog)[-1],
+    )
 
 
 def test_nothing_retrieved_is_logged_without_a_model_record(setup, caplog):

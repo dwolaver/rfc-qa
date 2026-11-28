@@ -87,7 +87,10 @@ class QueryResponse:
     """Structured result of a query.
 
     ``found`` is ``None`` on failure. On success it says whether the indexed RFCs answered the
-    question, and ``citations`` is non-empty only when they did.
+    question, and ``citations`` is non-empty only when they did. ``answer_rejected`` is true when the
+    response is not found because the model's answer was rejected: it said it found an answer, but
+    no citation named a passage it was sent, or the answer was blank. It is false otherwise,
+    including on failure.
     """
 
     success: bool
@@ -97,6 +100,7 @@ class QueryResponse:
     timings: Timings | None = None
     error_string: str | None = None
     error_code: QueryErrorCode | None = None
+    answer_rejected: bool = False
 
 
 @dataclass(frozen=True)
@@ -184,8 +188,10 @@ def _failure(code: QueryErrorCode, message: str, timings: Timings | None = None)
     return QueryResponse(success=False, error_code=code, error_string=message, timings=timings)
 
 
-def _not_found(timings: Timings) -> QueryResponse:
-    return QueryResponse(success=True, answer=NOT_FOUND_ANSWER, found=False, timings=timings)
+def _not_found(timings: Timings, *, answer_rejected: bool = False) -> QueryResponse:
+    return QueryResponse(
+        success=True, answer=NOT_FOUND_ANSWER, found=False, timings=timings, answer_rejected=answer_rejected
+    )
 
 
 def _chunk_token_target(index_path: str) -> int:
@@ -248,6 +254,12 @@ def _answer(user_query: str, config: QueryConfig, index_path: str) -> QueryRespo
 
     timings = clock.timings(generation)
     model_ms = _elapsed_ms(model_start)
+    if generation.answer_rejected:
+        logger.info(
+            "The model's answer was rejected, in %d ms: it cited no passage it was sent, or was blank",
+            model_ms,
+        )
+        return _not_found(timings, answer_rejected=True)
     if not generation.found:
         logger.info("The model found no answer in the passages, in %d ms", model_ms)
         return _not_found(timings)

@@ -51,11 +51,16 @@ class ModelSettings:
 
 @dataclass(frozen=True)
 class GenerationResult:
-    """The checked outcome of one model call. ``cited`` holds the retrieved chunks that were cited."""
+    """The checked outcome of one model call. ``cited`` holds the retrieved chunks that were cited.
+
+    ``answer_rejected`` is true when the model said it found an answer but the result is not found,
+    because no citation named a passage that was sent or the answer was blank.
+    """
 
     found: bool
     answer: str | None
     cited: list[Chunk] = field(default_factory=list)
+    answer_rejected: bool = False
     model_load_ms: int | None = None
     generation_ms: int | None = None
     prompt_tokens: int | None = None
@@ -185,7 +190,8 @@ def generate_answer(question: str, chunks: Sequence[Chunk], settings: ModelSetti
     """Answer ``question`` from ``chunks`` and return a :class:`GenerationResult`.
 
     Raises :class:`ModelUnavailableError` or :class:`ModelResponseError` when no usable answer comes
-    back. An answer with no valid citations is returned as not found, without its text.
+    back. An answer with no valid citations, or a blank one, is returned as not found, without its
+    text, and marked as rejected.
     """
     payload = _call_model(question, chunks, settings)
     prompt_tokens = payload.get("prompt_eval_count")
@@ -203,6 +209,7 @@ def generate_answer(question: str, chunks: Sequence[Chunk], settings: ModelSetti
         found=is_answered,
         answer=answer.strip() if is_answered else None,
         cited=cited if is_answered else [],
+        answer_rejected=found and not is_answered,
         model_load_ms=_to_ms(_int_or_none(payload.get("load_duration"))),
         generation_ms=_to_ms(sum(ns for ns in generation_ns if isinstance(ns, int)))
         if any(isinstance(ns, int) for ns in generation_ns)

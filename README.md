@@ -97,7 +97,7 @@ Sources:
 | [Configuration](docs/configuration.md) | The configuration files, the query settings, and choosing the configuration and data directories |
 | [Using the library](docs/library.md) | Calling the package from Python: `query()`, the errors it raises, and logging |
 | [Roadmap](docs/roadmap.md) | The steps ahead, why they're in that order, and the open questions |
-| [Evaluation](docs/evaluation.md) | The golden question set, scoring retrieval against it, and adding a question |
+| [Evaluation](docs/evaluation.md) | The golden question set, scoring retrieval and answers against it, and adding a question |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Setting up, the tests, the lint, type and secret checks, and how a change reaches `main` |
 | [Releasing](docs/releasing.md) | The release steps, including updating `ARCHITECTURE.md` |
 | [CHANGELOG.md](CHANGELOG.md) | What changed in each release, and what's changed since the last one |
